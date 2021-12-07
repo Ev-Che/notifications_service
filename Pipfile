@@ -9,6 +9,12 @@ pydantic = "*"
 alembic = "*"
 python-dotenv = "*"
 psycopg2-binary = "*"
+loguru = "*"
+fastapi = "*"
+kafka-python = "*"
+uvicorn = "*"
+websockets = "*"
+pyjwt = "*"
 
 [dev-packages]
 

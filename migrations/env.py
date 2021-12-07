@@ -1,4 +1,3 @@
-import os
 import sys
 from logging.config import fileConfig
 
@@ -7,8 +6,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from config import get_database_url
-from core.database import SQLALCHEMY_DATABASE_URL
+from app.services.service import Service
 from core.base import Base
 
 sys.path = ['', '..'] + sys.path[1:]
@@ -44,7 +42,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = get_database_url()
+    url = Service.get_database_url()
 
     context.configure(
         url=url,
@@ -65,7 +63,7 @@ def run_migrations_online():
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = get_database_url()
+    configuration['sqlalchemy.url'] = Service.get_database_url()
     connectable = engine_from_config(
         configuration=configuration,
         prefix='sqlalchemy.',
