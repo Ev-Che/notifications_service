@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    env_file:
+      - ./.env.db
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+
+  service:
+    build: .
+    container_name: notification_service
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 8002 --reload && alembic revision --autogenerate && alembic upgrade"
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8002:8002"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
