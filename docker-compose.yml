@@ -27,16 +27,5 @@ services:
     depends_on:
       - db
 
-  kafka_listener:
-    build:
-      context: .
-      dockerfile: consumer.Dockerfile
-    command: python kafka_consumer.py
-    volumes:
-      - .:/usr/src/app
-    depends_on:
-      - db
-      - service
-
 volumes:
   postgres_data:

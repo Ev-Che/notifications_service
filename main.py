@@ -1,5 +1,4 @@
 import asyncio
-from asyncio import sleep
 
 from fastapi import FastAPI
 from loguru import logger
@@ -7,6 +6,7 @@ from loguru import logger
 from app.routes import router
 from core.base import Base
 from core.database import engine, database
+from app.kafka_consumer import AIOConsumer
 
 Base.metadata.create_all(bind=engine)
 
@@ -18,6 +18,7 @@ app.include_router(router=router)
 async def startup():
     await database.connect()
     logger.debug('Database connected')
+    asyncio.create_task(AIOConsumer().listen_kafka())
 
 
 @app.on_event("shutdown")

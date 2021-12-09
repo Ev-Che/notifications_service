@@ -21,8 +21,6 @@ class DBHandler:
         )
         results = await database.fetch_all(query=query)
         logger.debug(f'Checking db for {user_id}')
-        logger.debug(
-            f'Returns {[NotificationSchema(**dict(result)) for result in results]}')
 
         return [NotificationSchema(**dict(result)) for result in results]
 
