@@ -15,6 +15,9 @@ kafka-python = "*"
 uvicorn = "*"
 websockets = "*"
 pyjwt = "*"
+databases = "*"
+asyncpg = "*"
+aiokafka = "*"
 
 [dev-packages]
 

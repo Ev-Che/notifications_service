@@ -10,3 +10,6 @@ class Notification(Base):
     user_id = sqlalchemy.Column(sqlalchemy.Integer)
     message = sqlalchemy.Column(sqlalchemy.String(255))
     is_active = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
+
+
+notifications = Notification.__table__

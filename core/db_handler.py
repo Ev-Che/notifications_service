@@ -1,30 +1,49 @@
-from sqlalchemy.orm import Query
+from asyncio import sleep
+from typing import List
 
-from app.models import Notification
-from app.schemas import NotificationBase
-from core.database import SessionLocal
+from loguru import logger
+
+from app.models import notifications
+from app.schemas import NotificationSchema, NotificationCreate
+from core.database import database
 
 
 class DBHandler:
-    session = SessionLocal()
 
-    def get_user_notifications(self, user_id: int) -> Query:
-        """Returns Query obj with all notifications for user with user_id"""
-        return self.session.query(Notification).filter(
-            Notification.user_id == user_id, Notification.is_active is True)
+    @staticmethod
+    async def get_user_notifications(user_id: int) -> List[NotificationSchema]:
+        """Returns List of NotificationSchema objects for user with user_id"""
+        await sleep(5)
 
-    def create_notification(self,
-                            notification: NotificationBase) -> Notification:
-        """Creates and returns Notification obj."""
-        db_notification = Notification(**notification.dict())
-        self.session.add(db_notification)
-        self.session.commit()
-        self.session.refresh(db_notification)
-        return db_notification
+        query = (
+            notifications.select().where(notifications.c.user_id == user_id,
+                                         notifications.c.is_active == True)
+        )
+        results = await database.fetch_all(query=query)
+        logger.debug(f'Checking db for {user_id}')
+        logger.debug(
+            f'Returns {[NotificationSchema(**dict(result)) for result in results]}')
 
-    async def deactivate_notifications(self, notifications: Query) -> None:
+        return [NotificationSchema(**dict(result)) for result in results]
+
+    @staticmethod
+    async def create_notification(
+            notification_obj: NotificationCreate) -> NotificationSchema:
+        """Creates notification in db and returns NotificationSchema."""
+
+        query = notifications.insert().values(**notification_obj.dict())
+        notification_id = await database.execute(query=query)
+
+        return NotificationSchema(**notification_obj.dict(),
+                                  id=notification_id)
+
+    @staticmethod
+    async def deactivate_notifications(
+            notification_list: List[NotificationSchema]) -> None:
         """Sets False to field is_actions for every notification from
         notifications Query"""
-        for notification in notifications:
-            notification.is_active = False
-        self.session.commit()
+        for notification in notification_list:
+            query = notifications.update() \
+                .where(notifications.c.id == notification.id) \
+                .values(is_active=False)
+            await database.execute(query=query)
